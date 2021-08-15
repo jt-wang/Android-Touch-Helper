@@ -63,7 +63,7 @@ public class TouchHelperServiceImpl {
     private PackageManager packageManager;
     private String currentPackageName, currentActivityName;
     private String packageName;
-    private Set<String> pkgLaunchers, pkgWhiteList;
+    private Set<String> pkgLaunchers, pkgBlocklist;
     private List<String> keyWordList;
 
     private Map<String, PackagePositionDescription> mapPackagePositions;
@@ -118,8 +118,8 @@ public class TouchHelperServiceImpl {
             keyWordList = mSetting.getKeyWordList();
 //            Log.d(TAG, keyWordList.toString());
 
-            // whitelist of packages
-            pkgWhiteList = mSetting.getWhitelistPackages();
+            // blocklist of packages
+            pkgBlocklist = mSetting.getBlocklistPackages();
 
             // load pre-defined widgets or positions
             mapPackageWidgets = mSetting.getPackageWidgets();
@@ -167,7 +167,7 @@ public class TouchHelperServiceImpl {
 //                        Log.d(TAG, keyWordList.toString());
                         break;
                     case TouchHelperService.ACTION_REFRESH_PACKAGE:
-                        pkgWhiteList = mSetting.getWhitelistPackages();
+                        pkgBlocklist = mSetting.getBlocklistPackages();
 //                        Log.d(TAG, pkgWhiteList.toString());
                         updatePackage();
                         break;
@@ -605,16 +605,6 @@ public class TouchHelperServiceImpl {
 //        Log.d(TAG, "updatePackage");
 
         pkgLaunchers = new HashSet<>();
-//        Set<String> pkgHomes = new HashSet<>();
-        Set<String> pkgTemps = new HashSet<>();
-
-        // find all launchers
-        Intent intent = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER);
-        List<ResolveInfo> ResolveInfoList = packageManager.queryIntentActivities(intent, PackageManager.MATCH_ALL);
-        for (ResolveInfo e : ResolveInfoList) {
-//            Log.d(TAG, "launcher - " + e.activityInfo.packageName);
-            pkgLaunchers.add(e.activityInfo.packageName);
-        }
         // find all homes
 //        intent = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME);
 //        ResolveInfoList = packageManager.queryIntentActivities(intent, PackageManager.MATCH_ALL);
@@ -630,14 +620,8 @@ public class TouchHelperServiceImpl {
 //        }
         // ignore some hardcoded packages
         // https://support.google.com/a/answer/7292363?hl=en
-        pkgTemps.add(packageName);
-        pkgTemps.add("com.android.settings");
-
         // remove whitelist, systems, homes & ad-hoc packages from pkgLaunchers
-        pkgLaunchers.removeAll(pkgWhiteList);
-//        pkgLaunchers.removeAll(pkgHomes);
-        pkgLaunchers.removeAll(pkgTemps);
-//        Log.d(TAG, "Working List = " + pkgLaunchers.toString());
+        pkgLaunchers.addAll(pkgBlocklist);
     }
 
     // display activity customization dialog, and allow users to pick widget or positions

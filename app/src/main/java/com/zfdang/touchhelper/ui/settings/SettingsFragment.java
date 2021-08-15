@@ -2,7 +2,6 @@ package com.zfdang.touchhelper.ui.settings;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -151,10 +150,10 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             });
         }
 
-        // select packages to be whitelisted
-        Preference whitelist = findPreference("setting_whitelist");
-        if(whitelist != null) {
-            whitelist.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        // select packages to be blocklisted
+        Preference blocklist = findPreference("setting_blocklist");
+        if(blocklist != null) {
+            blocklist.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     // find all packages
@@ -168,12 +167,12 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 
                     // generate AppInformation for packages
                     final ArrayList<AppInformation> listApp = new ArrayList<>();
-                    Set<String> pkgWhitelist = mSetting.getWhitelistPackages();
+                    Set<String> pkgBlocklist = mSetting.getBlocklistPackages();
                     for (String pkgName : list) {
                         try {
                             ApplicationInfo info = packageManager.getApplicationInfo(pkgName, PackageManager.GET_META_DATA);
                             AppInformation appInfo = new AppInformation(pkgName, packageManager.getApplicationLabel(info).toString(), packageManager.getApplicationIcon(info));
-                            appInfo.isChecked = pkgWhitelist.contains(pkgName);
+                            appInfo.isChecked = pkgBlocklist.contains(pkgName);
                             listApp.add(appInfo);
                         } catch (PackageManager.NameNotFoundException e) {
                             Log.e(TAG, Utilities.getTraceStackInString(e));
@@ -252,13 +251,13 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                             @Override
                             public void onClick(View view) {
                                 // save checked packages
-                                Set<String> pkgWhitelist = new HashSet<>();
+                                Set<String> pkgBlocklist = new HashSet<>();
                                 for(AppInformation app: listApp) {
                                     if(app.isChecked) {
-                                        pkgWhitelist.add(app.packageName);
+                                        pkgBlocklist.add(app.packageName);
                                     }
                                 }
-                                mSetting.setWhitelistPackages(pkgWhitelist);
+                                mSetting.setBlocklistPackages(pkgBlocklist);
 
                                 // notify accessibility to refresh packages
                                 if (TouchHelperService.serviceImpl != null) {

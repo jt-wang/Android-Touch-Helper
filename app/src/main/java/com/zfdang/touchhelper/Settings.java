@@ -50,21 +50,10 @@ public class Settings {
         // initial duration of skip ad process
         iSkipAdDuration = mPreference.getInt(SKIP_AD_DURATION, 4);
 
-        // find all system packages, and set them as default value for whitelist
-        PackageManager packageManager = TouchHelperApp.getAppContext().getPackageManager();
-        Intent intent = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER);
-        List<ResolveInfo> ResolveInfoList = packageManager.queryIntentActivities(intent, PackageManager.MATCH_ALL);
-        Set<String> pkgSystems = new HashSet<>();
-        for (ResolveInfo e : ResolveInfoList) {
-            if ((e.activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == ApplicationInfo.FLAG_SYSTEM) {
-                pkgSystems.add(e.activityInfo.packageName);
-            }
-        }
-
-        // init whitelist of packages
+        // init blocklist of packages
         // https://stackoverflow.com/questions/10720028/android-sharedpreferences-not-saving
         // Note that you must not modify the set instance returned by this call. The consistency of the stored data is not guaranteed if you do, nor is your ability to modify the instance at all.
-        setWhiteListPackages = new HashSet<String>(mPreference.getStringSet(WHITELIST_PACKAGE, pkgSystems));
+        blocklistPackages = new HashSet<String>(mPreference.getStringSet(BLOCKLIST_PACKAGE, new HashSet<String>()));
 
         // init key words
         String json = mPreference.getString(KEY_WORDS_LIST, "[\"跳过\"]");
@@ -125,17 +114,17 @@ public class Settings {
     }
 
 
-    // whitelist of packages
-    private static final String WHITELIST_PACKAGE = "WHITELIST_PACKAGE";
-    private Set<String> setWhiteListPackages;
-    public Set<String> getWhitelistPackages() {
-        return setWhiteListPackages;
+    // blocklist of packages
+    private static final String BLOCKLIST_PACKAGE = "BLOCKLIST_PACKAGE";
+    private Set<String> blocklistPackages;
+    public Set<String> getBlocklistPackages() {
+        return blocklistPackages;
     }
-    public void setWhitelistPackages(Set<String> pkgs) {
-        setWhiteListPackages.clear();
-        setWhiteListPackages.addAll(pkgs);
+    public void setBlocklistPackages(Set<String> pkgs) {
+        blocklistPackages.clear();
+        blocklistPackages.addAll(pkgs);
         // https://stackoverflow.com/questions/10720028/android-sharedpreferences-not-saving
-        mEditor.putStringSet(WHITELIST_PACKAGE, new HashSet<String>(setWhiteListPackages));
+        mEditor.putStringSet(BLOCKLIST_PACKAGE, new HashSet<String>(blocklistPackages));
         mEditor.apply();
     }
 
